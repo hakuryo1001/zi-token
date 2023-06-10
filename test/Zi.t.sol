@@ -20,7 +20,7 @@ contract Zi_Test is Zi_Setup {
         // Try to mint more than the total supply
         uint256 mint_amount = 10 ** 6 * 10 ** zi.decimals() + 1;
         vm.prank(alice);
-        vm.expectRevert("Hitting total supply of 1 million");
+        vm.expectRevert("Hitting supply limit");
         zi.mint(bob, mint_amount);
     }
 

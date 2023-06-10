@@ -17,6 +17,8 @@ import {Zi} from "../src/Zi.sol";
 /// @dev See the Solidity Scripting tutorial: https://book.getfoundry.sh/tutorials/solidity-scripting
 contract ZiScript is BaseScript {
     function run() public broadcaster returns (Zi zi) {
-        zi = new Zi();
+        uint256 _initialSupply = 1e5 * 1e18;
+        uint256 _supplyLimit = 1e6 * 1e18;
+        zi = new Zi(_initialSupply, _supplyLimit);
     }
 }

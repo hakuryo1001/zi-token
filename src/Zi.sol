@@ -33,9 +33,13 @@ contract Zi is Context, ERC20, MinterControl, ReentrancyGuard {
     uint256 public initialSupply;
     uint256 public supplyLimit;
 
-    constructor() ERC20("Zi", "ZI") {
-        initialSupply = uint256(10 ** 4) * 10 ** super.decimals();
-        supplyLimit = uint256(10 ** 6) * 10 ** super.decimals();
+    constructor(
+        uint256 _initialSupply,
+        uint256 _supplyLimit
+    ) ERC20("Zi", "ZI") {
+        initialSupply = _initialSupply;
+        supplyLimit = _supplyLimit;
+        // uint256(10 ** 6) * 10 ** super.decimals();
         _mint(_msgSender(), initialSupply);
     }
 
@@ -44,10 +48,7 @@ contract Zi is Context, ERC20, MinterControl, ReentrancyGuard {
         uint256 amount
     ) public nonReentrant onlyOwner {
         uint256 newTotalSupply = super.totalSupply() + amount;
-        require(
-            newTotalSupply <= supplyLimit,
-            "Hitting total supply of 1 million"
-        );
+        require(newTotalSupply <= supplyLimit, "Hitting supply limit");
         _mint(account, amount);
     }
 
