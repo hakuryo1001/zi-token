@@ -3,4 +3,19 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
+remappings = [
+    
+    "ds-test/=lib/forge-std/lib/ds-test/src/",
+    "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+    "forge-std/=lib/forge-std/src/",
+    "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+    "openzeppelin/=lib/openzeppelin-contracts/contracts/",
+    "@prb-test/=lib/prb-test/src/",
+    "@uniswap/lib/=lib/solidity-lib/",
+    "pyth-sdk-solidity/=lib/pyth-sdk-solidity/",
+    "solidity-lib/=lib/solidity-lib/contracts/",
+    "@uniswap/v2-core/=lib/v2-core/",
+    "@uniswap/v2-periphery/=lib/v2-periphery/contracts/"
+]
+
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

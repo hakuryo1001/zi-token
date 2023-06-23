@@ -18,13 +18,12 @@ contract Zi_Setup is PRBTest, StdCheats {
     address dominic = address(0xDD);
 
     function setUp() public {
-        vm.prank(alice);
         uint256 _initialSupply = 1e5 * 1e18;
         uint256 _supplyLimit = 1e6 * 1e18;
         zi = new Zi(_initialSupply, _supplyLimit);
     }
 
     function basicTest() public {
-        assertEq(zi.owner(), alice);
+        assertEq(zi.owner(), address(this));
     }
 }
