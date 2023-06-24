@@ -48,6 +48,8 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
     address[] public minterAddresses;
     mapping(address => bool) public minters;
     mapping(address => uint256) public minterAllowance;
+    mapping(address => uint256) public initialAllowance;
+
     mapping(address => bool) public enabledMinters;
 
     event Issue(uint256 amount);
@@ -103,8 +105,11 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
         address to,
         uint256 amount
     ) public nonReentrant whenNotDisabled(msg.sender) onlyMinters {
+        uint256 newTotalSupply = super.totalSupply() + amount;
+        require(newTotalSupply <= supplyLimit, "Hitting supply limit");
         uint256 balance = minterAllowance[msg.sender];
-        require(balance > amount, "Insufficient allowance");
+
+        require(balance >= amount, "Insufficient allowance");
         require(
             totalSupply().add(amount) > totalSupply(),
             "issuing negative amount to total supply"
@@ -116,15 +121,19 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
         );
 
         _mint(to, amount);
-        minterAllowance[msg.sender] = balance.sub(amount);
+        uint256 newAllowance = balance.sub(amount);
+        minterAllowance[msg.sender] = newAllowance;
 
         emit MintedByMinter(amount, to);
     }
 
-    // Redeem tokens.
-    // These tokens are withdrawn from the owner address
-    // if the blaance must be enough to cover the redemption
-    // or the call will fail.
+    // The from address can be anything so there's an element of danger here.
+    // Minter addresses should only be contracts, but since we don't have any good methods to detect if an address is a contract, we won't write a modifier to ensure that
+    // The reason why we do not limit the from argument to be address(minter)
+    //  is because minters added to this contract can themselves have a list of minters -
+    // those secondary order minters would not have minting and burning rights
+    // but the first order minters will need to have the right to burn and mint tokens from those secondary minters
+
     function burnByMinter(
         address from,
         uint256 amount
@@ -132,8 +141,17 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
         require(totalSupply() >= amount);
         require(balanceOf(from) >= amount);
         uint256 balance = minterAllowance[msg.sender];
+
         _burn(from, amount);
-        minterAllowance[msg.sender] = balance.add(amount);
+        uint256 _initialAllowance = initialAllowance[msg.sender];
+        uint256 newAllowance = balance.add(amount);
+
+        // if a minter has already burned enough such that its allowance has returned to its initial number
+        // burning more will now allow it to continue increasing its allowance beyond its initial allowance
+        // the tokens will simply be burned
+        if (newAllowance > _initialAllowance) {
+            minterAllowance[msg.sender] = _initialAllowance;
+        }
         emit BurnedByMinter(amount, from);
     }
 
@@ -146,6 +164,7 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
         minters[minter] = true;
         enabledMinters[minter] = true;
         minterAllowance[minter] = allowance;
+        initialAllowance[minter] = allowance;
 
         minterAddresses.push(minter);
         emit MinterConfigured(minter, allowance);
