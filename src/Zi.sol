@@ -49,7 +49,6 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
     mapping(address => bool) public minters;
     mapping(address => uint256) public minterAllowance;
     mapping(address => uint256) public initialAllowance;
-
     mapping(address => bool) public enabledMinters;
 
     event Issue(uint256 amount);
@@ -185,6 +184,8 @@ contract Zi is Context, ERC20, Ownable, ReentrancyGuard {
         require(isMinter(minter), "Address not on list of minter addresses!");
         delete minters[minter];
         delete minterAllowance[minter];
+        delete initialAllowance[minter];
+        delete enabledMinters[minter];
 
         for (uint256 i = 0; i < minterAddresses.length; i++) {
             // if the programme finds a slot in the array whose entry is the minter
